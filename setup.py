@@ -17,7 +17,7 @@ setup(
         'pytest~=8.3.2',
         'pyserial',
         'typing',
-    ]
+    ],
     zip_safe=True,
     maintainer='Alex Kulagin',
     maintainer_email='sashakulagin2007@gmail.com',
