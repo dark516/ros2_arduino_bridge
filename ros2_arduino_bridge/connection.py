@@ -1,14 +1,12 @@
+"""
+Двустороннее общение по Serial Master - Slave
+"""
 from enum import Enum
 from struct import Struct
 from time import sleep
 from typing import Final
 
 from serial import Serial
-
-INPUT = 0x0
-OUTPUT = 0x1
-INPUT_PULLUP = 0x2
-LED_BUILTIN = 13
 
 
 class Primitives(Enum):
@@ -67,49 +65,39 @@ class ArduinoConnection:
     """Пример подключения к Arduino с минимальным набором команд"""
 
     def __init__(self, serial: Serial) -> None:
-        self.serial = serial
-
+        self._serial = serial
         # Команды этого устройства
-        self._pin_mode = Command(0x10, (Primitives.u8, Primitives.u8))
-        self._digital_write = Command(0x11, (Primitives.u8, Primitives.u8))
-        self._digital_read = Command(0x12, (Primitives.u8,))
-        self._delay_ms = Command(0x13, (Primitives.u32,))
+        self._set_motors = Command(0x10, (Primitives.i8, Primitives.i8))
 
     # Обёртки над командами ниже, чтобы сразу компилировать и отправлять их в порт
+    def setSpeeds(self, left: int, right: int) -> None:
+        self._serial.write(self._set_motors.pack(left, right))
 
-    def pinMode(self, pin: int, mode: int) -> None:
-        self.serial.write(self._pin_mode.pack(pin, mode))
-
-    def digitalWrite(self, pin: int, state: bool | int) -> None:
-        self.serial.write(self._digital_write.pack(pin, state))
-
-    def digitalRead(self, pin: int) -> bool:
-        self.serial.write(self._digital_read.pack(pin))  # Отправляем запрос для чтения пина
-        response = self.serial.read()  # Ждём и получаем ответ (bytes)
-        return Primitives.u8.unpack(response)  # получаем распакованное значение
-
-    def delay(self, milliseconds: int) -> None:
-        self.serial.write(self._delay_ms.pack(milliseconds))
-        # Код будет спать вместе с Arduino
-        sleep(0.001 * milliseconds)
-
-
-def main() -> None:
-    # Подключение к Arduino, скорость повышенная
-    arduino = ArduinoConnection(Serial("COM10", 115200))
-
-    # Ожидание пока вся инициализация slave платы пройдёт ...
-    sleep(2)
-
-    # Стандартный блинк
-    arduino.digitalWrite(LED_BUILTIN, 1)
-    arduino.delay(1000)
-    arduino.digitalWrite(LED_BUILTIN, 0)
-    arduino.delay(1000)
-
-    # Закрытие порта
-    arduino.serial.close()
-
+    def close(self):
+        self._serial.close()
 
 if __name__ == '__main__':
-    main()
+    port_name = "/dev/ttyACM0"
+    arduino = ArduinoConnection(Serial(port_name))
+
+    sleep(2)
+
+    arduino.setSpeeds(0, 0)
+    sleep(1)
+
+    arduino.setSpeeds(4, 0)
+    sleep(1)
+
+    arduino.setSpeeds(-4, 0)
+    sleep(1)
+
+    arduino.setSpeeds(0, 4)
+    sleep(1)
+
+    arduino.setSpeeds(0, -4)
+    sleep(1)
+
+    arduino.setSpeeds(0, 1)
+    sleep(1)
+
+    arduino.close()
