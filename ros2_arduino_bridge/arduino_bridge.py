@@ -16,10 +16,12 @@ class MotorController(Node):
         return max(min(int(motor_speed * cls.MAX_MOTOR_SPEED_TICKS), cls.MAX_MOTOR_SPEED_TICKS),
                    -cls.MAX_MOTOR_SPEED_TICKS)
 
-    def __init__(self, connect: ArduinoConnection):
+    def __init__(self):
         super().__init__('motor_controller')
-
-        self._connect = connect
+	self.declare_parameter('serial_port', '/dev/ttyACM0')
+        serial_port = self.get_parameter('serial_port').get_parameter_value().string_value
+	
+        self._connect = ArduinoConnection(Serial(serial_port, 115200))
 
         # Подписка на топик /cmd_vel
         self.subscription = self.create_subscription(
@@ -60,7 +62,7 @@ class MotorController(Node):
 def main(args=None):
     rclpy.init(args=args)
     
-    motor_controller = MotorController(ArduinoConnection(Serial("/dev/ttyACM0", 115200)))
+    motor_controller = MotorController()
     sleep(2)  # TODO
 
     rclpy.spin(motor_controller)
