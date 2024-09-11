@@ -1,6 +1,4 @@
 from time import sleep
-from typing import Final, ClassVar
-
 import rclpy
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
@@ -10,7 +8,7 @@ from ros2_arduino_bridge.connection import ArduinoConnection
 
 
 class MotorController(Node):
-    MAX_MOTOR_SPEED_TICKS: Final[ClassVar[int]] = 13
+    MAX_MOTOR_SPEED_TICKS = 13
     """Максимальное значение скорости для моторов"""
 
     @classmethod
