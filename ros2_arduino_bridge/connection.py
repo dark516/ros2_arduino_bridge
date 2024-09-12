@@ -50,7 +50,7 @@ class Data:
 
     @classmethod
     def make(cls, buffer: bytes):
-        return cls.__init__(*cls.data_packer.unpack(buffer))
+        return cls(*cls.data_packer.unpack(buffer))
 
 class Command:
     """
@@ -83,14 +83,14 @@ class ArduinoConnection:
         # Команды этого устройства
         self._set_motors = Command(0x10, (Primitives.i8, Primitives.i8))
 
-        self._get_data = Command(0x11, ())
+        self._get_data = Command(0x11, (Primitives.u8,))
 
     # Обёртки над командами ниже, чтобы сразу компилировать и отправлять их в порт
     def setSpeeds(self, left: int, right: int) -> None:
         self._serial.write(self._set_motors.pack(left, right))
     
     def get_data(self):
-        self._serial.write(self._get_data.pack([]))
+        self._serial.write(self._get_data.pack(1))
         
         data_bytes = self._serial.read(Data.data_packer.size)
         return Data.make(data_bytes)
@@ -101,9 +101,11 @@ class ArduinoConnection:
 
 if __name__ == '__main__':
     port_name = "/dev/ttyACM0"
-    arduino = ArduinoConnection(Serial(port_name))
+    arduino = ArduinoConnection(Serial(port_name, 115200))
 
     sleep(2)
+
+    print(arduino.get_data())
 
     arduino.setSpeeds(0, 0)
     sleep(1)
@@ -122,5 +124,6 @@ if __name__ == '__main__':
 
     arduino.setSpeeds(0, 1)
     sleep(1)
+    print(arduino.get_data())
 
     arduino.close()

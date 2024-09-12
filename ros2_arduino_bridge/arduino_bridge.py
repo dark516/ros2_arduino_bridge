@@ -37,7 +37,7 @@ class Arduino_bridge(Node):
         self.last_left_motor_speed = None
         self.last_right_motor_speed = None
         
-        #self.data_request_timer = self.create_timer(1.0, self.data)  # Запрос данных раз в 1 секунду
+        self.data_request_timer = self.create_timer(1.0, self.data)  # Запрос данных раз в 1 секунду
 
 
     def cmd_vel_callback(self, msg):
@@ -45,7 +45,7 @@ class Arduino_bridge(Node):
         linear = msg.linear.x
         angular = msg.angular.z
 
-        left_motor_speed = (linear - angular * self.wheel_base / 2) / self.wheel_radius
+        left_motor_speed = (linear - angular * self.wheel_base / 2) / self.wheel_radius   #TODO ПОСТАВИТЬ ЭТИ 2 СТРОЧКИ, когда робот будет ехать с реальной скоростью
         right_motor_speed = (linear + angular * self.wheel_base / 2) / self.wheel_radius
 
         # Ограничиваем скорость в пределах [-13, 13]
@@ -58,6 +58,7 @@ class Arduino_bridge(Node):
             self.last_right_motor_speed = right_motor_speed
 
     def data(self):
+        #Отправка данных
         arduino_data = self._connect.get_data()
         self.left_speed_pub.publish(Int32(data=arduino_data.left))
         self.right_speed_pub.publish(Int32(data=arduino_data.right))
