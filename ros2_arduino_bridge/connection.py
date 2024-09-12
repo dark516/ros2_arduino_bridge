@@ -7,7 +7,7 @@ from time import sleep
 from typing import Final
 
 from serial import Serial
-
+import struct
 
 class Primitives(Enum):
     """Примитивные типы"""
@@ -39,6 +39,18 @@ class Primitives(Enum):
     def unpack(self, buffer: bytes) -> bool | int | float:
         return self.value.unpack(buffer)[0]
 
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Data:
+    left: int
+    right: int
+
+    data_packer = Struct("bb")
+
+    @classmethod
+    def make(cls, buffer: bytes):
+        return cls.__init__(*cls.data_packer.unpack(buffer))
 
 class Command:
     """
@@ -52,6 +64,8 @@ class Command:
         self.header: Final[bytes] = Primitives.u8.pack(code)
         self.signature = signature
 
+        
+
     def pack(self, *args) -> bytes:
         """
         Скомпилировать команду в набор байт
@@ -62,16 +76,25 @@ class Command:
 
 
 class ArduinoConnection:
-    """Пример подключения к Arduino с минимальным набором команд"""
+    """Пример подключения к Arduino с dataминимальным набором команд"""
 
     def __init__(self, serial: Serial) -> None:
         self._serial = serial
         # Команды этого устройства
         self._set_motors = Command(0x10, (Primitives.i8, Primitives.i8))
 
+        self._get_data = Command(0x11, ())
+
     # Обёртки над командами ниже, чтобы сразу компилировать и отправлять их в порт
     def setSpeeds(self, left: int, right: int) -> None:
         self._serial.write(self._set_motors.pack(left, right))
+    
+    def get_data(self):
+        self._serial.write(self._get_data.pack([]))
+        
+        data_bytes = self._serial.read(Data.data_packer.size)
+        return Data.make(data_bytes)
+
 
     def close(self):
         self._serial.close()
