@@ -58,7 +58,9 @@ class Arduino_bridge(Node):
             self.last_right_motor_speed = right_motor_speed
 
     def data(self):
-        #TODO
+        arduino_data = self._connect.get_data()
+        self.left_speed_pub.publish(Int32(data=arduino_data.left))
+        self.right_speed_pub.publish(Int32(data=arduino_data.right))
 
     def shutdown(self) -> None:
         self._connect.close()
