@@ -44,5 +44,5 @@ ls /dev| grep ttyACM
 ```
 3.  Run the node with an explicit indication of the port received in the previous step
 ```bash
-ros2 run ros2_arduino_bridge arduino_bridge -ros-args -p serial_port:=/dev/ttyUSB1
+ros2 run ros2_arduino_bridge arduino_bridge /dev/ttyACM0
 ```
