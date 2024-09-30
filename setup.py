@@ -23,7 +23,9 @@ setup(
     maintainer_email='sashakulagin2007@gmail.com',
     description='ros2 node to contact with arduino',
     license='TODO: License declaration',
-    tests_require=['pytest'],
+    extras_require={
+        'test': ['pytest'],
+    },
     entry_points={
     'console_scripts': [
         'arduino_bridge = ros2_arduino_bridge.arduino_bridge:main',
