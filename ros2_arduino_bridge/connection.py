@@ -46,7 +46,7 @@ class Data:
     left: int
     right: int
 
-    data_packer = Struct("bb")
+    data_packer = Struct("hh")
 
     @classmethod
     def make(cls, buffer: bytes):

@@ -28,8 +28,8 @@ class Arduino_bridge(Node):
             self.cmd_vel_callback,
             10)
 
-        self.left_speed_pub = self.create_publisher(Int32, 'left_motor/real_speed', 10)
-        self.right_speed_pub = self.create_publisher(Int32, 'right_motor/real_speed', 10)
+        self.left_speed_pub = self.create_publisher(Int32, 'left_motor/encoder/delta', 10)
+        self.right_speed_pub = self.create_publisher(Int32, 'right_motor/encoder/delta', 10)
 
         self.wheel_base = 0.175  # Расстояние между колесами в метрах
         self.wheel_radius = 0.0325  # Радиус колес в метрах
@@ -37,7 +37,7 @@ class Arduino_bridge(Node):
         self.last_left_motor_speed = None
         self.last_right_motor_speed = None
         
-        self.data_request_timer = self.create_timer(1.0, self.data)  # Запрос данных раз в 1 секунду
+        self.data_request_timer = self.create_timer(0.05, self.data)  # Запрос данных раз в 1 секунду
 
 
     def cmd_vel_callback(self, msg):
